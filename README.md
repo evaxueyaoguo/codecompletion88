@@ -69,3 +69,27 @@ You can author your README using Visual Studio Code. Here are some useful editor
 * [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
 
 **Enjoy!**
+
+
+## References
+
+setup
+https://code.visualstudio.com/api/get-started/your-first-extension?spm=a2c65.11461447.0.0.24df3114Q1QJpz
+
+https://code.visualstudio.com/api/get-started/extension-anatomy
+
+https://code.visualstudio.com/api/references/vscode-api?spm=a2c65.11461447.0.0.24df3114Q1QJpz
+
+https://www.alibabacloud.com/blog/develop-a-dedicated-code-hinting-plug-in-for-vscode_599038
+
+https://code.visualstudio.com/docs/editor/userdefinedsnippets
+
+https://www.youtube.com/watch?v=i5wK7_E9SWo
+
+https://www.kaggle.com/datasets/eemanmajumder/the-leetcode-solution-dataset/
+
+https://microsoft.github.io/CodeXGLUE/
+
+https://arxiv.org/abs/2211.04673
+
+
