@@ -56,9 +56,12 @@ def extract_local_variables(node, local_variables, indent=0, visited=set()):
 
     for _, child_node in node:
         extract_local_variables(child_node, local_variables)
+        
+
     
-def get_method_calls_on_local_variable(ast, local_variable_name, visited=set()):
+def get_method_calls_and_type_on_local_variable(ast, local_variable_name, visited=set()):
     method_calls = []
+    var_type = ""
 
     def encode_local_variables(node, enclosing_method=None, visited=set()):
         if id(node) in visited:
@@ -67,15 +70,17 @@ def get_method_calls_on_local_variable(ast, local_variable_name, visited=set()):
 
         if isinstance(node, javalang.tree.MethodInvocation):
             if node.qualifier == local_variable_name:
-                method_calls.append({
-                    'method_name': node.member,
-                    # 'arguments': [arg.value for arg in node.arguments]
-                })
+                method_calls.append(node.member)
+        elif isinstance(node, javalang.tree.LocalVariableDeclaration):
+            if node.declarators[0].name == local_variable_name:
+                nonlocal var_type 
+                var_type = node.type.name
+                print(node.type.name)
 
     for _, node in ast:
         encode_local_variables(node)
-
-    return method_calls
+        
+    return method_calls, var_type
 
 def encode_ast_context(ast):
   # TODO: takes an ast from a file, should return a 2-D matrix of the context of each local variable
@@ -105,13 +110,17 @@ def main():
         for _, node in ast:
             extract_local_variables(node, local_variable_set)
 
-        # print("Local Variables:")
+        context_dict = {}
+
         for variable in local_variable_set:
-            print(variable+ ": ")
-            result = get_method_calls_on_local_variable(ast, variable)
-            # Display the result
-            for call_info in result:
-                print(call_info)
+            # print(variable+ ": ")
+            method_calls, declared_type= get_method_calls_and_type_on_local_variable(ast, variable)
+            enclosing_method = ""
+            
+            context_dict[variable] = [method_calls, declared_type, enclosing_method]
+            # Display the context
+        for c in context_dict:
+            print(c, '', context_dict[c])
 
 
 if __name__ == "__main__":
