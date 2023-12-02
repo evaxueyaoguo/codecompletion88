@@ -56,7 +56,27 @@ def extract_local_variables(node, local_variables, indent=0, visited=set()):
 
     for _, child_node in node:
         extract_local_variables(child_node, local_variables)
-            
+    
+def get_method_calls_on_local_variable(ast, local_variable_name, visited=set()):
+    method_calls = []
+
+    def encode_local_variables(node, enclosing_method=None, visited=set()):
+        if id(node) in visited:
+            return
+        visited.add(id(node))
+
+        if isinstance(node, javalang.tree.MethodInvocation):
+            if node.qualifier == local_variable_name:
+                method_calls.append({
+                    'method_name': node.member,
+                    # 'arguments': [arg.value for arg in node.arguments]
+                })
+
+    for _, node in ast:
+        encode_local_variables(node)
+
+    return method_calls
+
 def encode_ast_context(ast):
   # TODO: takes an ast from a file, should return a 2-D matrix of the context of each local variable
   # num rows = num local variables
@@ -72,26 +92,26 @@ def find_best_matching_neighbors(observation, context_matrix):
 def synthesize_recommendation(best_matching_neighbors):
   # TODO: synthesize a recommendation based on the best matching neighbors
   pass
-
+        
 def main():
   directory_path = "./data"
   
   code = collect_code_examples(directory_path) # list of file strings
-  ast_trees = parse_to_ast(code)
-  # for _, node in ast_trees[0]:
-  #     traverse_ast(node)
-  # print(ast_trees[0])
+  ast_trees = parse_to_ast(code) # list of ast trees
   
-  for ast in ast_trees:
-    # Assuming 'ast' is the AST you provided
-    local_variable_set = set()
+  for ast in ast_trees:    
+        local_variable_set = set()
 
-    for _, node in ast:
-        extract_local_variables(node, local_variable_set)
+        for _, node in ast:
+            extract_local_variables(node, local_variable_set)
 
-    print("Local Variables:")
-    for variable in local_variable_set:
-        print(variable)
+        # print("Local Variables:")
+        for variable in local_variable_set:
+            print(variable+ ": ")
+            result = get_method_calls_on_local_variable(ast, variable)
+            # Display the result
+            for call_info in result:
+                print(call_info)
 
 
 if __name__ == "__main__":
