@@ -11,7 +11,7 @@ def collect_code_examples(directory):
         for file in files:
             if file.endswith(".py"):
                 file_path = os.path.join(root, file)
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                     code_examples.append(f.read())
 
     return code_examples
