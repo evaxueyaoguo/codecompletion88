@@ -13,12 +13,31 @@ import org.eclipse.swt.widgets.Text;
 // https://github.com/wala/WALA
 
 public class HelloWorld {
+	// public Text test_text = new Text();
 
 	public static void main(String[] args) {
 		final Display display = new Display();
 
 		final Shell shell = new Shell(display);
-		shell.setText("Hello World");
+// 		StatementExpression(
+// 		expression=MethodInvocation(
+// 				arguments=[Literal(
+// 						postfix_operators=[],
+// 						prefix_operators=[],
+// 						qualifier=None,
+// 						selectors=[],
+// 						value="Hello World"*
+// 				)],
+// 				member=setText,*
+// 				postfix_operators=[],
+// 				prefix_operators=[],
+// 				qualifier=shell,*
+// 				selectors=[],
+// 				type_arguments=None
+// 		),
+// 		label=None
+// ),
+		shell.setText("Hello World"); 
 		shell.setLayout(new GridLayout(2, false));
 
 		final Label label = new Label(shell, SWT.LEFT);
@@ -56,5 +75,11 @@ public class HelloWorld {
 		}
 
 		display.dispose();
+	}
+
+	public void anotherMethod() {
+		// test_text.setLayoutData(null);
+		Shell shell = new Shell();
+		shell.setText("Hello World");
 	}
 }

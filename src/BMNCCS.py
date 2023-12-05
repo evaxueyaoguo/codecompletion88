@@ -128,6 +128,9 @@ def context_dict_to_matrix(context_dict):
 
     return binary_matrix, encoding_format
 
+def get_context(ast, variable):
+    pass
+
 def encode_context(context, encoding_format):
     pass
 
@@ -138,7 +141,7 @@ def find_best_matching_neighbors(observation, context_matrix):
 def synthesize_recommendation(best_matching_neighbors):
   # TODO: synthesize a recommendation based on the best matching neighbors
   pass
-       
+
         
 def extract_classes_methods_variables(ast):
     result_dict = {}
@@ -173,34 +176,59 @@ def get_enclosing_methods_from_dict(variable_name, enclosing_methods_dict):
     return list(enclosing_methods)
 
 def main():
-  directory_path = "./data"
-  
-  code = collect_code_examples(directory_path) # list of file strings
-  ast_trees = parse_to_ast(code) # list of ast trees
-  
-  for ast in ast_trees:    
-    local_variable_set = set()
-    enclosing_methods_dict = extract_classes_methods_variables(ast)
+    data_directory_path = "./data"
 
-    for _, node in ast:
-        extract_local_variables(node, local_variable_set)
+    data_code = collect_code_examples(data_directory_path) # list of file strings
+    ast_trees = parse_to_ast(data_code) # list of ast trees
 
-    context_dict = {}
+    for ast in ast_trees:    
+        local_variable_set = set()
+        enclosing_methods_dict = extract_classes_methods_variables(ast)
 
-    for variable in local_variable_set:
-        method_calls, declared_type = get_method_calls_and_type_on_local_variable(ast, variable)
-        enclosing_methods = get_enclosing_methods_from_dict(variable, enclosing_methods_dict)
-        context_dict[variable] = [method_calls, declared_type, enclosing_methods]
+        for _, node in ast:
+            extract_local_variables(node, local_variable_set)
+
+        context_dict = {}
+
+        for variable in local_variable_set:
+            method_calls, declared_type = get_method_calls_and_type_on_local_variable(ast, variable)
+            enclosing_methods = get_enclosing_methods_from_dict(variable, enclosing_methods_dict)
+            context_dict[variable] = [method_calls, declared_type, enclosing_methods]
+            
+        for variable, data in context_dict.items():
+            print(variable, data)
+        context_matrix, encoding_format = context_dict_to_matrix(context_dict)
+        print(context_matrix)
+        print(encoding_format)
         
-    for variable, data in context_dict.items():
-        print(variable, data)
-    context_matrix, encoding_format = context_dict_to_matrix(context_dict)
-    print(context_matrix)
-    print(encoding_format)
-
-
  # code comletion starts here
-
+    curr_directory_path = "./"
+    curr_code = collect_code_examples(curr_directory_path) # list of file strings
+    curr_ast = parse_to_ast(curr_code)[0] # context ast tree
+    curr_variable = "display"
+    # context_vec = get_context(curr_ast, curr_variable)
+    # TODO: retvist how to get current context
+    
+    curr_context_dict = {}
+    enclosing_methods_dict = extract_classes_methods_variables(curr_ast)
+    method_calls, declared_type = get_method_calls_and_type_on_local_variable(curr_ast, curr_variable)
+    enclosing_methods = get_enclosing_methods_from_dict(curr_variable, enclosing_methods_dict)
+    curr_context_dict[curr_variable] = [method_calls, declared_type, enclosing_methods]
+    for variable, data in curr_context_dict.items():
+        print(variable, data)
+    
+    # TODO: encode context to vector
+    
+    # TODO: find best matching neighbors using Hamming distance
+    
+    # TODO: add type infomration to the recommendation
+    
+    # TODO: synthesize a recommendation based on the best matching neighbors
+    
+    # TODO: integrate with VSCode
+    
+    
+    # print(curr_ast)
 
 if __name__ == "__main__":
     main()
