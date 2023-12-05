@@ -57,27 +57,7 @@ def extract_local_variables(node, local_variables, indent=0, visited=set()):
 
     for _, child_node in node:
         extract_local_variables(child_node, local_variables)
-
-def is_variable_used_in_method(node, variable_name, indent=0, visited=set()):
-    if id(node) in visited:
-        return False
-    visited.add(id(node))
-    # for _, node in javalang.traverse.iterate(method_node):
-    if isinstance(node, javalang.tree.LocalVariableDeclaration):
-        for declarator in node.declarators:
-            if declarator.name == variable_name:
-                return True
-    elif isinstance(node, javalang.tree.VariableDeclarator) and node.name == variable_name:
-        return True
-        # Add more cases as needed based on your requirements 
-    # elif isinstance(node, (javalang.tree.ClassDeclaration, javalang.tree.MethodDeclaration)):
-    for _, child_node in node:
-        if is_variable_used_in_method(child_node, variable_name, indent + 2, visited):
-            return True
-
-    return False
-    
-    
+     
 def find_parent(tree, target_node):
     for path, node in tree:
         for _, child_node in node:
@@ -88,7 +68,7 @@ def find_parent(tree, target_node):
 def get_method_calls_and_type_on_local_variable(ast, local_variable_name, visited=set()):
     method_calls = []
     var_type = ""
-    enclosing_methods = set() # FIXME
+    # enclosing_methods = set() # FIXME
     
     def encode_local_variables(node, enclosing_method=None, visited=set()):
         if id(node) in visited:
@@ -103,33 +83,32 @@ def get_method_calls_and_type_on_local_variable(ast, local_variable_name, visite
             if node.declarators[0].name == local_variable_name:
                 nonlocal var_type 
                 var_type = node.type.name
-                # enclosing_method = find_parent(ast, node)
-                # print(type(enclosing_method))
-                # print(node.type.name)
-                # print(node.parent)
-        elif isinstance(node, javalang.tree.MethodDeclaration):
-            print("calling is_variable_used_in_method for var: " + local_variable_name)
-            if is_variable_used_in_method(node, local_variable_name):
-                enclosing_methods.add(node.name)
 
     for _, node in ast:
         encode_local_variables(node)
         
-    return method_calls, var_type, enclosing_methods
+    return method_calls, var_type
 
 def context_dict_to_matrix(context_dict):
-    # Extract information from the input dictionary
+# returns a 2-D matrix of the context of each local variable
+  # num rows = num local variables
+  # num cols = num method contexts in the training code base + 
+  #            num all callable methods on all framework types ??
+  # return context_matrix
+# Extract information from the input dictionary
     variable_names = list(context_dict.keys())
     method_contexts = set()
     methods_called = set()
+    encoding_format = list()
 
     for data in context_dict.values():
         methods_called.update(data[0])
-        method_contexts.add(data[2])
+        method_contexts.update(data[2])
 
+    # these 2 lists are the encoding format. i.e. which column is which in the binary matrix
     method_contexts = list(method_contexts)
     methods_called = list(methods_called)
-
+    encoding_format = method_contexts + methods_called
     # Initialize a binary matrix with zeros
     binary_matrix = np.zeros((len(variable_names), len(method_contexts) + len(methods_called)), dtype=int)
 
@@ -138,46 +117,19 @@ def context_dict_to_matrix(context_dict):
         methods_called_on_variable, variable_type, enclosing_methods = context_dict[variable_name]
 
         # Set 1 for the method context
-        method_context_idx = method_contexts.index(enclosing_methods)
-        binary_matrix[idx, method_context_idx] = 1
+        for method_context in enclosing_methods:
+            method_context_idx = method_contexts.index(method_context)
+            binary_matrix[idx, method_context_idx] = 1
 
         # Set 1 for each method called on the variable
         for method_called in methods_called_on_variable:
             method_called_idx = len(method_contexts) + methods_called.index(method_called)
             binary_matrix[idx, method_called_idx] = 1
 
-    return binary_matrix
+    return binary_matrix, encoding_format
 
-def find_enclosing_function(node, variable_name, parent=None, visited=set()):
-    if id(node) in visited:
-        return None
-    visited.add(id(node))
-    
-    if isinstance(node, javalang.tree.MethodDeclaration):
-        # Check if the variable is declared in the method's parameters
-        for parameter in node.parameters:
-            if parameter.name == variable_name:
-                return node.name
-
-        # Check if the variable is declared in the method's body
-        for path, child_node in node:
-            if find_enclosing_function(child_node, variable_name, parent=node, visited=visited):
-                return node.name
-
-    for _, child_node in node:
-        result = find_enclosing_function(child_node, variable_name, parent=parent, visited=visited)
-        if result:
-            return result
-
-    return None
-
-def encode_ast_context(ast):
-  # TODO: takes an ast from a file, should return a 2-D matrix of the context of each local variable
-  # num rows = num local variables
-  # num cols = num method contexts in the training code base + 
-  #            num all callable methods on all framework types ??
-  # return context_matrix
-  pass
+def encode_context(context, encoding_format):
+    pass
 
 def find_best_matching_neighbors(observation, context_matrix):
   # TODO: user Hamming distance to find the best matching neighbors
@@ -186,7 +138,40 @@ def find_best_matching_neighbors(observation, context_matrix):
 def synthesize_recommendation(best_matching_neighbors):
   # TODO: synthesize a recommendation based on the best matching neighbors
   pass
+       
         
+def extract_classes_methods_variables(ast):
+    result_dict = {}
+
+    for path, node in ast:
+        if isinstance(node, javalang.tree.ClassDeclaration):
+            class_name = node.name
+            method_dict = {}
+
+            for member in node.body:
+                if isinstance(member, javalang.tree.MethodDeclaration):
+                    method_name = member.name
+                    variables = []
+
+                    for local_variable in member.body:
+                        if isinstance(local_variable, javalang.tree.LocalVariableDeclaration):
+                            for declarator in local_variable.declarators:
+                                variables.append(declarator.name)
+
+                    method_dict[method_name] = variables if variables else None
+
+            result_dict[class_name] = method_dict
+
+    return result_dict       
+        
+def get_enclosing_methods_from_dict(variable_name, enclosing_methods_dict):
+    enclosing_methods = set()
+    for class_name, method_dict in enclosing_methods_dict.items():
+        for method_name, variables in method_dict.items():
+            if variables and variable_name in variables:
+                enclosing_methods.add(method_name)
+    return list(enclosing_methods)
+
 def main():
   directory_path = "./data"
   
@@ -194,25 +179,27 @@ def main():
   ast_trees = parse_to_ast(code) # list of ast trees
   
   for ast in ast_trees:    
-        local_variable_set = set()
+    local_variable_set = set()
+    enclosing_methods_dict = extract_classes_methods_variables(ast)
 
-        for _, node in ast:
-            extract_local_variables(node, local_variable_set)
+    for _, node in ast:
+        extract_local_variables(node, local_variable_set)
 
-        context_dict = {}
+    context_dict = {}
 
-        for variable in local_variable_set:
-            method_calls, declared_type, enclosing_method = get_method_calls_and_type_on_local_variable(ast, variable)
-            # enclosing_method = find_enclosing_function(ast, variable) # FIXME: THIS IS NOT WORKING
-            
-            # context_dict[variable] = [method_calls, enclosing_method]
-            context_dict[variable] = [method_calls, declared_type, enclosing_method]
-            
-        for variable, data in context_dict.items():
-            print(variable, data)
-            
-        # context_matrix = context_dict_to_matrix(context_dict)
-        # print(context_matrix)
+    for variable in local_variable_set:
+        method_calls, declared_type = get_method_calls_and_type_on_local_variable(ast, variable)
+        enclosing_methods = get_enclosing_methods_from_dict(variable, enclosing_methods_dict)
+        context_dict[variable] = [method_calls, declared_type, enclosing_methods]
+        
+    for variable, data in context_dict.items():
+        print(variable, data)
+    context_matrix, encoding_format = context_dict_to_matrix(context_dict)
+    print(context_matrix)
+    print(encoding_format)
+
+
+ # code comletion starts here
 
 
 if __name__ == "__main__":
