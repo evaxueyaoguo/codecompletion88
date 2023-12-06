@@ -24,7 +24,8 @@ def parse_to_ast(code_examples):
             ast_tree = javalang.parse.parse(code_example)
             ast_list.append(ast_tree)
         except javalang.parser.JavaSyntaxError as e:
-            print(f"Error parsing Java code: {e}")
+            # print(f"Error parsing Java code: {e}")
+            continue
 
     return ast_list
 
@@ -198,7 +199,6 @@ def get_method_calls_from_encoding_format(encoding_format):
             method_calls.append(format)
     return method_calls
     
-    
 def subset_matrix(matrix, column_encodings, subset_encodings):
     # Find indices of the subset encodings in the column encodings
     subset_indices = [column_encodings.index(encoding) for encoding in subset_encodings]
@@ -284,13 +284,17 @@ def main():
     # this needs to be fixed
     root_directory = "/Users/xueyaoguo/Desktop/DS_project/codecompletion88/"
     current_directory = os.path.join(root_directory, "src")
-    data_path = os.path.join(current_directory, "data")
+    data_path = os.path.join(current_directory, "data") # 2236 asts
     # print(current_directory)
 
+    # FIXME: handle multiple ast trees --> context matrix
+    # right now only the last context matrix is saved
+    
     data_code = collect_code_examples(data_path) # list of file strings
     ast_trees = parse_to_ast(data_code) # list of ast trees
     encoding_format = []
     context_matrix = []
+    # print(len(ast_trees))
 
     # TODO; accomondate multiple ast trees
     for ast in ast_trees: 

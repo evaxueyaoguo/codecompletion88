@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "codecompletion88.helloWorld",
-        "title": "Hello World"
+        "command": "codecompletion88.activate",
+        "title": "Activate CodeCompletion88"
       }
     ]
   },

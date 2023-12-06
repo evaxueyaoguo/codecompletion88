@@ -3,7 +3,8 @@ import { execSync } from 'child_process';
 import * as path from 'path';
 
 /** Supported language type */
-const LANGUAGES = ['typescriptreact', 'typescript', 'javascript', 'javascriptreact'];
+// const LANGUAGES = ['typescriptreact', 'typescript', 'javascript', 'javascriptreact'];
+const LANGUAGES = ['java'];
 
 let dictionary = ['hello', 'nihao', 'dajiahao', 'leihaoa'];
 
@@ -50,7 +51,9 @@ function callPythonScript(name: string): string {
 
 function replaceVariableName(methodString: string, variableName: string): string {
     // Using a regular expression to replace 'HelloWorld' with the provided variable name
-    const replacedString = methodString.replace(/HelloWorld/g, variableName);
+    let methodArr: string[] = methodString.split('.');
+    methodArr[0] = variableName;
+    const replacedString: string = methodArr.join('.');
     return replacedString;
 }
 
@@ -77,7 +80,7 @@ function replaceVariableNameInArray(localVariableName: string, inputString: stri
 export function activate(context: vscode.ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "codecompletion88" is now active!');
+	console.log('🪩 Codecompletion88 is now active!');
 
     //TODO: get the local vairaible name
     const recommendationString = callPythonScript('hello');
@@ -88,10 +91,10 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('codecompletion88.helloWorld', () => {
+	let disposable = vscode.commands.registerCommand('codecompletion88.activate', () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello VS Code from CodeCompletion88!');
+		vscode.window.showInformationMessage('Codecompletion88 is now active! 🪩');
 	});
 
     /** Trigger a list of recommended characters */
