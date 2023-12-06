@@ -6,6 +6,20 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"type": "java",
+			"name": "MainApp",
+			"request": "launch",
+			"mainClass": "src.BMN.MainApp",
+			"projectName": "codecompletion88_735c4919"
+		},
+		{
+			"type": "java",
+			"name": "Main",
+			"request": "launch",
+			"mainClass": "src.BMN.Main",
+			"projectName": "codecompletion88_735c4919"
+		},
+		{
 			"name": "Run Extension",
 			"type": "extensionHost",
 			"request": "launch",

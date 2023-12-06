@@ -240,7 +240,7 @@ def synthesize_recommendation(best_matching_neighbors, encoding_format):
   method_calls = get_method_calls_from_encoding_format(encoding_format)
   method_calls_matrix = subset_matrix(best_matching_neighbors, encoding_format, method_calls)
   likelihoods = calculate_likelihood(method_calls_matrix, method_calls)
-  recommendations = filter_methods_by_threshold(likelihoods, 50)
+  recommendations = filter_methods_by_threshold(likelihoods, 0)
   return recommendations
         
 def extract_classes_methods_variables(ast):
@@ -282,11 +282,17 @@ def main():
     # and {'shell': [['HelloWorld.setText'], 'Shell', ['in:HelloWorld.anotherMethod']]}
     # [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     # this needs to be fixed
-    data_directory_path = "./data"
+    root_directory = "/Users/xueyaoguo/Desktop/DS_project/codecompletion88/"
+    current_directory = os.path.join(root_directory, "src")
+    data_path = os.path.join(current_directory, "data")
+    # print(current_directory)
 
-    data_code = collect_code_examples(data_directory_path) # list of file strings
+    data_code = collect_code_examples(data_path) # list of file strings
     ast_trees = parse_to_ast(data_code) # list of ast trees
+    encoding_format = []
+    context_matrix = []
 
+    # TODO; accomondate multiple ast trees
     for ast in ast_trees: 
         local_variable_set = set()
         enclosing_methods_dict = extract_classes_methods_variables(ast)
@@ -303,23 +309,23 @@ def main():
 
         # add in: to the enclosing methods to distinguish them from method calls
         context_dict_processed = process_context_dict(context_dict)
-        print("context_dict_processed")
-        print(context_dict_processed)
+        # print("context_dict_processed")
+        # print(context_dict_processed)
         
         # for variable, data in context_dict.items():
         #     print(variable, data)
-            
+        
         context_matrix, encoding_format = context_dict_to_matrix(context_dict_processed)
-        print(context_matrix)
-        print(encoding_format)
+        # print(context_matrix)
+        # print(encoding_format)
         
  # code comletion starts here
  
     # TODO: handle Error parsing Java code: 
-    curr_directory_path = "./"
+    curr_directory_path = current_directory
     curr_code = collect_code_examples(curr_directory_path) # list of file strings
     curr_ast = parse_to_ast(curr_code)[0] # context ast tree
-    curr_variable = "shell"
+    curr_variable = "display"
     # print(curr_ast)
     # context_vec = get_context(curr_ast, curr_variable)
     # TODO: retvist how to get current context
@@ -329,21 +335,21 @@ def main():
     method_calls, declared_type = get_method_calls_and_type_on_local_variable(curr_ast, curr_variable)
     enclosing_methods = get_enclosing_methods_from_dict(curr_variable, enclosing_methods_dict)
     curr_context_dict[curr_variable] = [method_calls, declared_type, enclosing_methods]
-    for variable, data in curr_context_dict.items():
-        print(variable, data)
+    # for variable, data in curr_context_dict.items():
+    #     print(variable, data)
     
     curr_context_dict_processed = process_context_dict(curr_context_dict)
-    print(curr_context_dict_processed)
+    # print(curr_context_dict_processed)
     
     # encode context to vector
     context = curr_context_dict_processed[curr_variable]
     curr_context_vector = get_context_vector(context, encoding_format)
-    print(curr_context_vector)
+    # print(curr_context_vector)
     
     #find best n matching neighbors using Hamming distance
     n = 5
     best_matching_neighbors = find_best_matching_neighbors(n, curr_context_vector, context_matrix)
-    print(best_matching_neighbors)
+    # print(best_matching_neighbors)
     
     # TODO: synthesize a recommendation based on the best matching neighbors
     recommendations = synthesize_recommendation(best_matching_neighbors, encoding_format)
