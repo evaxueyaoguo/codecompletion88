@@ -142,6 +142,53 @@ def context_dict_to_matrix(context_dict):
             binary_matrix[idx, method_called_idx] = 1
     return binary_matrix, encoding_format
 
+def context_set_to_matrix(context_set):
+        # returns a 2-D matrix of the context of each local variable
+    # num rows = num local variables
+    # num cols = num method contexts in the training code base + 
+    #            num all callable methods on all framework types ??
+    # return context_matrix
+    # Extract information from the input dictionary
+    # variable_names = list(context_dict.keys())
+    method_contexts = set()
+    methods_called = set()
+    var_types = set()
+    encoding_format = list()
+
+    for data in context_set:
+        methods_called.update(data[0])
+        var_types.add(data[1])
+        method_contexts.update(data[2])
+        
+
+    # these 2 lists are the encoding format. i.e. which column is which in the binary matrix
+    method_contexts = list(method_contexts)
+    var_types = list(var_types)
+    methods_called = list(methods_called)
+    encoding_format = method_contexts + var_types + methods_called
+    # Initialize a binary matrix with zeros
+    binary_matrix = np.zeros((len(context_set), len(method_contexts) + len(var_types) + len(methods_called)), dtype=int)
+
+    # Fill in the matrix based on the rules
+    for idx, data in enumerate(context_set):
+        methods_called_on_variable, variable_type, enclosing_methods = data
+
+        # Set 1 for the method context
+        for method_context in enclosing_methods:
+            method_context_idx = method_contexts.index(method_context)
+            binary_matrix[idx, method_context_idx] = 1
+            
+        # Set 1 for the variable type
+        if variable_type in var_types:
+            var_type_idx = len(method_contexts) + var_types.index(variable_type)
+            binary_matrix[idx, var_type_idx] = 1
+
+        # Set 1 for each method called on the variable
+        for method_called in methods_called_on_variable:
+            method_called_idx = len(method_contexts) + len(var_types)+ methods_called.index(method_called)
+            binary_matrix[idx, method_called_idx] = 1
+    return binary_matrix, encoding_format
+    
 def process_context_dict(context_dict):
     context_dict_processed = {}
     for variable, data in context_dict.items():
@@ -275,6 +322,22 @@ def get_enclosing_methods_from_dict(variable_name, enclosing_methods_dict):
                 enclosing_methods.add(method_name)
     return list(enclosing_methods)
 
+def remove_duplicate_rows(matrix):
+    seen_rows = set()
+    unique_matrix = []
+
+    for row in matrix:
+        # Convert the row to a tuple to make it hashable
+        row_tuple = tuple(row)
+
+        # Check if the row is not in the set of seen rows
+        if row_tuple not in seen_rows:
+            # Add the row to the set and the unique_matrix
+            seen_rows.add(row_tuple)
+            unique_matrix.append(list(row))
+
+    return unique_matrix
+
 def main():
     # FIXME: is each column a local variable or a method context?
     # e.g. 'shell': [['HelloWorld.setText', 'HelloWorld.setLayout', 'HelloWorld.setDefaultButton', 'HelloWorld.setSize', 'HelloWorld.computeSize', 'HelloWorld.open', 'HelloWorld.isDisposed', 'HelloWorld.setText', 'anotherClass.setText'], 'Shell', ['in:HelloWorld.main', 'in:anotherClass.anotherMethodInAnotherClass', 'in:HelloWorld.anotherMethod']]
@@ -286,12 +349,10 @@ def main():
     current_directory = os.path.join(root_directory, "src")
     data_path = os.path.join(current_directory, "data") # 2236 asts
     # print(current_directory)
-
-    # FIXME: handle multiple ast trees --> context matrix
-    # right now only the last context matrix is saved
     
     data_code = collect_code_examples(data_path) # list of file strings
     ast_trees = parse_to_ast(data_code) # list of ast trees
+    context_list = list()
     encoding_format = []
     context_matrix = []
     # print(len(ast_trees))
@@ -316,12 +377,21 @@ def main():
         # print("context_dict_processed")
         # print(context_dict_processed)
         
+        for variable, data in context_dict_processed.items():
+            print(variable, data)
+            # context_list.add(tuple(data))
+            context_list.append(data)
+        
         # for variable, data in context_dict.items():
         #     print(variable, data)
         
-        context_matrix, encoding_format = context_dict_to_matrix(context_dict_processed)
-        # print(context_matrix)
-        # print(encoding_format)
+    # context_matrix, encoding_format = context_dict_to_matrix(context_dict_processed)
+    context_matrix, encoding_format = context_set_to_matrix(context_list)
+    unique_context_matrix = remove_duplicate_rows(context_matrix)
+
+    print(len(unique_context_matrix))
+    print(len(unique_context_matrix))
+    print(encoding_format)
         
  # code comletion starts here
  
