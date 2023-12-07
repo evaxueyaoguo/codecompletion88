@@ -48,16 +48,23 @@ def traverse_ast(node, indent=0, visited=set()):
             traverse_ast(child_node, indent + 2, visited)
             
 def extract_local_variables(node, local_variables, indent=0, visited=set()):
-    if id(node) in visited:
-        return
-    visited.add(id(node))
-    
-    if isinstance(node, javalang.tree.LocalVariableDeclaration):
-        for declarator in node.declarators:
-            local_variables.add(declarator.name)
-
-    for _, child_node in node:
-        extract_local_variables(child_node, local_variables)
+    try:
+        if id(node) in visited:
+            return
+        visited.add(id(node))
+        
+        if isinstance(node, javalang.tree.LocalVariableDeclaration):
+            for declarator in node.declarators:
+                local_variables.add(declarator.name)
+                
+        if hasattr(node, "body") and node.body is not None:
+            for _, child_node in node:
+                extract_local_variables(child_node, local_variables)
+            
+    except TypeError as e:
+        # Catch TypeError and continue
+        print(f"Caught TypeError: {e}")
+        pass
      
 def find_parent(tree, target_node):
     for path, node in tree:
@@ -357,7 +364,6 @@ def main():
     context_matrix = []
     # print(len(ast_trees))
 
-    # TODO; accomondate multiple ast trees
     for ast in ast_trees: 
         local_variable_set = set()
         enclosing_methods_dict = extract_classes_methods_variables(ast)
