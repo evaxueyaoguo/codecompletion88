@@ -235,16 +235,55 @@ def get_hamming_distance(vector1, vector2):
     # Calculate the Hamming distance between two binary vectors
     return sum(bit1 != bit2 for bit1, bit2 in zip(vector1, vector2))
 
-def find_best_matching_neighbors(n, context_vec, context_matrix):
-    #use Hamming distance to find the best matching neighbors
-    # Calculate Hamming distances for all vectors in the matrix
-    distances = [(i, get_hamming_distance(context_vec, row)) for i, row in enumerate(context_matrix)]
+# def find_n_best_matching_neighbors(n, context_vec, context_matrix):
+#     #use Hamming distance to find the best matching neighbors
+#     # Calculate Hamming distances for all vectors in the matrix
+#     distances = [(i, get_hamming_distance(context_vec, row)) for i, row in enumerate(context_matrix)]
 
-    # Sort the vectors based on Hamming distance and return the top n
+#     # Sort the vectors based on Hamming distance and return the top n
+#     sorted_distances = sorted(distances, key=lambda x: x[1])
+#     best_n_neighbors = [index for index, _ in sorted_distances[:n]]
+#     best_n_neighbors = [context_matrix[index] for index in best_n_neighbors]
+#     return best_n_neighbors
+
+# def find_best_matching_neighbors(context_vec, context_matrix):
+#     # TODO: based on incomplete information
+#     # Use Hamming distance to find the best matching neighbors
+#     # Calculate Hamming distances for all vectors in the matrix
+#     distances = [(i, get_hamming_distance(context_vec, row)) for i, row in enumerate(context_matrix)]
+
+#     # Sort the vectors based on Hamming distance
+#     sorted_distances = sorted(distances, key=lambda x: x[1])
+
+#     # Find the minimum distance
+#     min_distance = sorted_distances[0][1]
+
+#     # Collect all vectors with equally the smallest distance
+#     best_matching_neighbors = [context_matrix[i] for i, dist in sorted_distances if dist == min_distance]\
+
+#     return best_matching_neighbors
+
+def find_best_matching_neighbors(context_vec, context_matrix):
+    # vector distance is calculated based in a partial feature space
+    # Modified: the distance is calculated using incompVec
+    # If a column in context_vec == 1 , caluclate distance
+    # If a column in context_vec == 0,  context is unkonwn, skip
+    # context info contains both enclosing fuction, type, and methods called
+    distances = [
+        (i, sum(1 for a, b in zip(context_vec, row) if a == 1 and b == 0))
+        for i, row in enumerate(context_matrix)
+    ]
+
+    # Sort the vectors based on the calculated distance
     sorted_distances = sorted(distances, key=lambda x: x[1])
-    best_n_neighbors = [index for index, _ in sorted_distances[:n]]
-    best_n_neighbors = [context_matrix[index] for index in best_n_neighbors]
-    return best_n_neighbors
+
+    # Find the minimum distance
+    min_distance = sorted_distances[0][1]
+
+    # Collect all vectors with equally the smallest distance
+    best_matching_neighbors = [context_matrix[i] for i, dist in sorted_distances if dist == min_distance]
+
+    return best_matching_neighbors
 
 def get_method_calls_from_encoding_format(encoding_format):
     method_calls = []
@@ -255,10 +294,13 @@ def get_method_calls_from_encoding_format(encoding_format):
     
 def subset_matrix(matrix, column_encodings, subset_encodings):
     # Find indices of the subset encodings in the column encodings
+    # print("in subset_matrix")
     subset_indices = [column_encodings.index(encoding) for encoding in subset_encodings]
+    # print(subset_indices)
 
     # Extract the subset of columns from the matrix
-    subset_matrix = np.array([row[subset_indices] for row in matrix])
+    subset_matrix = np.array([[row[i] for i in subset_indices] for row in matrix])
+    # print(subset_matrix)
 
     return subset_matrix
 
@@ -282,7 +324,7 @@ def calculate_likelihood(matrix, column_encodings):
 
 def filter_methods_by_threshold(method_likelihoods, threshold):
     # Filter methods based on the threshold
-    selected_methods = [method for method, likelihood in method_likelihoods.items() if likelihood > threshold]
+    selected_methods = [method for method, likelihood in method_likelihoods.items() if likelihood >= threshold]
 
     # Sort the selected methods based on likelihood in descending order
     sorted_methods = sorted(selected_methods, key=lambda x: method_likelihoods[x], reverse=True)
@@ -290,12 +332,13 @@ def filter_methods_by_threshold(method_likelihoods, threshold):
     return sorted_methods
 
 def synthesize_recommendation(best_matching_neighbors, encoding_format):
-  # TODO: synthesize a recommendation based on the best matching neighbors
-  method_calls = get_method_calls_from_encoding_format(encoding_format)
-  method_calls_matrix = subset_matrix(best_matching_neighbors, encoding_format, method_calls)
-  likelihoods = calculate_likelihood(method_calls_matrix, method_calls)
-  recommendations = filter_methods_by_threshold(likelihoods, 0)
-  return recommendations
+    # print("best_matching_neighbors")
+    # print(best_matching_neighbors)
+    method_calls = get_method_calls_from_encoding_format(encoding_format)
+    method_calls_matrix = subset_matrix(best_matching_neighbors, encoding_format, method_calls)
+    likelihoods = calculate_likelihood(method_calls_matrix, method_calls)
+    recommendations = filter_methods_by_threshold(likelihoods, 50)
+    return recommendations
         
 def extract_classes_methods_variables(ast):
     result_dict = {}
@@ -427,9 +470,10 @@ def main():
     # print(curr_context_vector)
     
     #find best n matching neighbors using Hamming distance
-    n = 5
-    best_matching_neighbors = find_best_matching_neighbors(n, curr_context_vector, context_matrix)
-    # print(best_matching_neighbors)
+    # n = 5
+    # best_matching_neighbors = find_best_matching_neighbors(n, curr_context_vector, context_matrix)
+    best_matching_neighbors = find_best_matching_neighbors(curr_context_vector, context_matrix)
+    print(len(best_matching_neighbors))
     
     # TODO: synthesize a recommendation based on the best matching neighbors
     recommendations = synthesize_recommendation(best_matching_neighbors, encoding_format)

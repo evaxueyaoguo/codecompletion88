@@ -83,6 +83,28 @@ def count_different_elements(vector1, vector2):
     differing_elements = sum(1 for elem1, elem2 in zip(vector1, vector2) if elem1 != elem2)
 
     return differing_elements
+
+def get_relevant_recommendations(label, test_context_vector_degraded, encoding_format):
+    relevant_recommendations = [element for element, label_bit, test_bit in zip(encoding_format, label, test_context_vector_degraded) if label_bit == 1 and test_bit == 0]
+    return relevant_recommendations
+
+def get_intersection(list1, list2):
+    return list(set(list1) & set(list2))
+
+def get_precision(recommendations_made, recommendations_relevant):
+    if len(recommendations_made) == 0:
+        return 0
+    return len(get_intersection(recommendations_made, recommendations_relevant)) / len(recommendations_made)
+
+def get_recall(recommendations_made, recommendations_relevant):
+    if len(recommendations_relevant) == 0:
+        return 0
+    return len(get_intersection(recommendations_made, recommendations_relevant)) / len(recommendations_relevant)
+
+def get_f1_score(precision_val, recall_val):
+    if precision_val == 0 and recall_val == 0:
+        return 0
+    return 2 * (precision_val * recall_val) / (precision_val + recall_val)
   
 def main():
   print("Reading training context from files...")
@@ -108,30 +130,29 @@ def main():
              
                                                 
   print("Predicting...")
-  correct_prediction_count = 0
+#   correct_prediction_count = 0
+  precision_values = []
+  recall_values = []
+  f1_values = []
   for idx, test_context_vector in enumerate(test_context_vectors_degraded_processed[:10]):
     print("Predicting for test context vector " + str(idx) + "...")
-    #find best n matching neighbors using Hamming distance
-    n = 1
-    best_matching_neighbors = BMNCCS.find_best_matching_neighbors(1, test_context_vector, train_context_matrix_processed)[0]
+    #find best matching neighbors using Hamming distance
+    best_matching_neighbors = BMNCCS.find_best_matching_neighbors(test_context_vector, train_context_matrix_processed)
+    recommendations_made = BMNCCS.synthesize_recommendation(best_matching_neighbors, combined_encoding_format)
+    print(recommendations_made)
+    
     label = test_context_vectors_processed[idx]
-    if best_matching_neighbors == label:
-      correct_prediction_count += 1
-      
-    diff = count_different_elements(best_matching_neighbors, label)
-    print("Difference: " + str(diff))
-      
-  # print("Accuracy: " + str(correct_prediction_count / len(test_context_vectors_degraded)))
-  print("Accuracy: " + str(correct_prediction_count / 10))
+    recommendations_relevant = get_relevant_recommendations(label, test_context_vector, combined_encoding_format)
+    precision_values.append(get_precision(recommendations_made, recommendations_relevant))
+    recall_values.append(get_recall(recommendations_made, recommendations_relevant))
+    f1_values.append(get_f1_score(precision_values[-1], recall_values[-1]))
+    print("Precision: " + str(precision_values[-1]))
+    print("Recall: " + str(recall_values[-1]))
+    print("F1 score: " + str(f1_values[-1]))
+
     
-    
-    
-    # print(best_matching_neighbors)
-    
-    # # TODO: synthesize a recommendation based on the best matching neighbors
-    # recommendations = BMNCCS.synthesize_recommendation(best_matching_neighbors, encoding_format)
-    # print(recommendations)
-  
+    # FIXME: precision and recall are 0.0
+    # FIXME: f1 score is 0.0
 
 if __name__ == '__main__':
   main()
