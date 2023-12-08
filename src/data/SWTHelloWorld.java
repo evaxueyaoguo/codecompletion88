@@ -83,3 +83,11 @@ public class HelloWorld {
 		shell.setText("Hello World");
 	}
 }
+
+public class anotherClass{
+	public void anotherMethodInAnotherClass() {
+		// test_text.setLayoutData(null);
+		Shell shell = new Shell();
+		shell.setText("Hello World");
+	}
+}

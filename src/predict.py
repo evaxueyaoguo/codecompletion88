@@ -130,7 +130,6 @@ def main():
              
                                                 
   print("Predicting...")
-#   correct_prediction_count = 0
   precision_values = []
   recall_values = []
   f1_values = []
@@ -139,9 +138,10 @@ def main():
     #find best matching neighbors using Hamming distance
     best_matching_neighbors = BMNCCS.find_best_matching_neighbors(test_context_vector, train_context_matrix_processed)
     recommendations_made = BMNCCS.synthesize_recommendation(best_matching_neighbors, combined_encoding_format)
-    print(recommendations_made)
+    print(len(recommendations_made)) # this seems to be the same for all test context vectors
+    # FIXME: need to work on model accuracy
     
-    label = test_context_vectors_processed[idx]
+    label = test_context_vectors_processed[idx] # TODO: need to look into this, returning recs, just not the correct ones 
     recommendations_relevant = get_relevant_recommendations(label, test_context_vector, combined_encoding_format)
     precision_values.append(get_precision(recommendations_made, recommendations_relevant))
     recall_values.append(get_recall(recommendations_made, recommendations_relevant))
@@ -150,7 +150,7 @@ def main():
     print("Recall: " + str(recall_values[-1]))
     print("F1 score: " + str(f1_values[-1]))
 
-    
+    # FIXME: giving recommendationsm just not the correct ones
     # FIXME: precision and recall are 0.0
     # FIXME: f1 score is 0.0
 

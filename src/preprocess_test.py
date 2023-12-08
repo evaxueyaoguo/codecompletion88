@@ -84,7 +84,6 @@ def main():
   # print(len(test_context_vectors_degraded))
   preprocess.save_matrix_to_file(test_context_vectors_degraded, "test_context_matrix_degraded.csv")
   
-  pass
 
 if __name__ == '__main__':
   main()

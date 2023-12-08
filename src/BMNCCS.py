@@ -86,8 +86,8 @@ def get_method_calls_and_type_on_local_variable(ast, local_variable_name, visite
 
         if isinstance(node, javalang.tree.MethodInvocation):
             if node.qualifier == local_variable_name:
-                nonlocal enclosing_class
-                method_calls.append(enclosing_class + "." + node.member)
+                # method_calls.append(enclosing_class + "." + node.member)
+                method_calls.append("." + node.member)
                 
         elif isinstance(node, javalang.tree.LocalVariableDeclaration):
             if node.declarators[0].name == local_variable_name:
@@ -337,7 +337,7 @@ def synthesize_recommendation(best_matching_neighbors, encoding_format):
     method_calls = get_method_calls_from_encoding_format(encoding_format)
     method_calls_matrix = subset_matrix(best_matching_neighbors, encoding_format, method_calls)
     likelihoods = calculate_likelihood(method_calls_matrix, method_calls)
-    recommendations = filter_methods_by_threshold(likelihoods, 50)
+    recommendations = filter_methods_by_threshold(likelihoods, 0)
     return recommendations
         
 def extract_classes_methods_variables(ast):
@@ -445,10 +445,11 @@ def main():
  # code comletion starts here
  
     # TODO: handle Error parsing Java code: 
-    curr_directory_path = current_directory
+    # curr_directory_path = "/Users/xueyaoguo/Desktop/DS_project/codecompletion88/src/curr_file.java"
+    curr_directory_path = "/Users/xueyaoguo/Desktop/DS_project/codecompletion88/src/curr_file"
     curr_code = collect_code_examples(curr_directory_path) # list of file strings
-    curr_ast = parse_to_ast(curr_code)[0] # context ast tree
-    curr_variable = "display"
+    curr_ast = parse_to_ast(curr_code)[0]# context ast tree
+    curr_variable = "y"
     # print(curr_ast)
     # context_vec = get_context(curr_ast, curr_variable)
     # TODO: retvist how to get current context
@@ -458,11 +459,13 @@ def main():
     method_calls, declared_type = get_method_calls_and_type_on_local_variable(curr_ast, curr_variable)
     enclosing_methods = get_enclosing_methods_from_dict(curr_variable, enclosing_methods_dict)
     curr_context_dict[curr_variable] = [method_calls, declared_type, enclosing_methods]
-    # for variable, data in curr_context_dict.items():
-    #     print(variable, data)
+    print("curr_context_dict")
+    for variable, data in curr_context_dict.items():
+        print(variable, data)
     
     curr_context_dict_processed = process_context_dict(curr_context_dict)
-    # print(curr_context_dict_processed)
+    print("curr_context_dict_processed")
+    print(curr_context_dict_processed)
     
     # encode context to vector
     context = curr_context_dict_processed[curr_variable]
