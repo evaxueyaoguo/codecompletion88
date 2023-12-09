@@ -43,6 +43,24 @@ def get_recommendations_from_method_frequency(curr_context_dict_processed, metho
     return [option[0] for option in sorted_options[:n]]
   else:
     return []
+  
+def get_recommendations_from_method_frequency_with_var_type(var_type, method_frequency, n):
+  if var_type in method_frequency:
+    options = method_frequency[var_type]
+    sorted_options = sorted(options.items(), key=lambda x: x[1], reverse=True)
+    return [option[0] for option in sorted_options[:n]]
+  else:
+    return []
+  
+def get_var_type_from_context_vector(test_context_vector, combined_encoding_format):
+  var_type = ""
+  for i in range(len(test_context_vector)):
+    if test_context_vector[i] == 1:
+      print(i, test_context_vector[i], combined_encoding_format[i])
+    # if test_context_vector[i] == 1 and not combined_encoding_format[i].startswith("in:") and not "." in item:
+      var_type = combined_encoding_format[i]
+      break
+  return var_type
 
 def main():
     root_directory = "/Users/xueyaoguo/Desktop/DS_project/codecompletion88/"

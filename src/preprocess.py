@@ -74,7 +74,7 @@ def main():
           # print(context_dict_processed)
           
           for variable, data in context_dict_processed.items():
-              print(variable, data)
+            #   print(variable, data)
               # context_list.add(tuple(data))
               train_context_list.append(data)
           
@@ -129,7 +129,7 @@ def main():
           # print(context_dict_processed)
           
           for variable, data in context_dict_processed.items():
-              print(variable, data)
+            #   print(variable, data)
               # context_list.add(tuple(data))
               test_context_list.append(data)
           

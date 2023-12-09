@@ -264,15 +264,22 @@ def get_hamming_distance(vector1, vector2):
 #     return best_matching_neighbors
 
 def find_best_matching_neighbors(context_vec, context_matrix):
-    # vector distance is calculated based in a partial feature space
-    # Modified: the distance is calculated using incompVec
+    # Vector distance is calculated based in a partial feature space
+    # The distance is calculated using incompVec
     # If a column in context_vec == 1 , caluclate distance
     # If a column in context_vec == 0,  context is unkonwn, skip
     # context info contains both enclosing fuction, type, and methods called
-    distances = [
-        (i, sum(1 for a, b in zip(context_vec, row) if a == 1 and b == 0))
-        for i, row in enumerate(context_matrix)
-    ]
+
+    distances = []
+    # Enumerates through rows, calculating the count of positions where context_vec has 1 
+    # and the corresponding position in the row has 0.
+    for i, row in enumerate(context_matrix):
+        count = 0
+        for a, b in zip(context_vec, row):
+            if a == 1 and b == 0:
+                count += 1
+
+        distances.append((i, count))
 
     # Sort the vectors based on the calculated distance
     sorted_distances = sorted(distances, key=lambda x: x[1])
@@ -332,12 +339,10 @@ def filter_methods_by_threshold(method_likelihoods, threshold):
     return sorted_methods
 
 def synthesize_recommendation(best_matching_neighbors, encoding_format):
-    # print("best_matching_neighbors")
-    # print(best_matching_neighbors)
     method_calls = get_method_calls_from_encoding_format(encoding_format)
     method_calls_matrix = subset_matrix(best_matching_neighbors, encoding_format, method_calls)
     likelihoods = calculate_likelihood(method_calls_matrix, method_calls)
-    recommendations = filter_methods_by_threshold(likelihoods, 0)
+    recommendations = filter_methods_by_threshold(likelihoods, 1)
     return recommendations
         
 def extract_classes_methods_variables(ast):
@@ -439,7 +444,7 @@ def main():
     unique_context_matrix = remove_duplicate_rows(context_matrix)
 
     print(len(unique_context_matrix))
-    print(len(unique_context_matrix))
+    print(unique_context_matrix)
     print(encoding_format)
         
  # code comletion starts here
@@ -449,7 +454,7 @@ def main():
     curr_directory_path = "/Users/xueyaoguo/Desktop/DS_project/codecompletion88/src/curr_file"
     curr_code = collect_code_examples(curr_directory_path) # list of file strings
     curr_ast = parse_to_ast(curr_code)[0]# context ast tree
-    curr_variable = "y"
+    curr_variable = "display"
     # print(curr_ast)
     # context_vec = get_context(curr_ast, curr_variable)
     # TODO: retvist how to get current context

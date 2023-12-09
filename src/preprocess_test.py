@@ -78,7 +78,7 @@ def main():
   method_called_idx = get_method_called_idx(test_encoding_format)
   # print(test_context_vectors)
   # print(test_encoding_format)
-  print(method_called_idx)
+#   print(method_called_idx)
   test_context_vectors_degraded = degrade_context_vectors(test_context_vectors, test_encoding_format, method_called_idx)
   # print(len(test_context_vectors))
   # print(len(test_context_vectors_degraded))
