@@ -342,7 +342,7 @@ def synthesize_recommendation(best_matching_neighbors, encoding_format):
     method_calls = get_method_calls_from_encoding_format(encoding_format)
     method_calls_matrix = subset_matrix(best_matching_neighbors, encoding_format, method_calls)
     likelihoods = calculate_likelihood(method_calls_matrix, method_calls)
-    recommendations = filter_methods_by_threshold(likelihoods, 1)
+    recommendations = filter_methods_by_threshold(likelihoods, 50)
     return recommendations
         
 def extract_classes_methods_variables(ast):

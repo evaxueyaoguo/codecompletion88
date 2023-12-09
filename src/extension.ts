@@ -12,6 +12,9 @@ let dictionary = ['hello', 'nihao', 'dajiahao', 'leihaoa'];
 /** Commands that are triggered after the user chooses items */
 const COMMAND_NAME = 'my_code_completion_choose_item';
 
+// const MODE= 'BMNCCS';
+const MODE= 'FreqCCS';
+
 /** The command triggered when the recommended item is registered */
 function registerCommand(command: string) {
     vscode.commands.registerTextEditorCommand(
@@ -23,7 +26,7 @@ function registerCommand(command: string) {
     );
 }
 
-function initCCSController(mode: string) {
+function initCCSController() {
     console.log('Initiating CCSController...');
     const rootDirectory = path.resolve(__dirname, '..');
     const srcDirectory = path.join(rootDirectory, 'src');
@@ -185,7 +188,7 @@ class MyCompletionItemProvider implements vscode.CompletionItemProvider {
             recommendations[i].documentation = 'Method recommended by CC88🪩';
             recommendations[i].label = dictionary[i]+ "🪩";
             recommendations[i].insertText = dictionary[i].split('.').pop();
-            recommendations[i].detail = 'from CC88🪩';
+            recommendations[i].detail = 'from CC88 ' + MODE + "🪩";
             recommendations[i].kind = vscode.CompletionItemKind.Method;
         }
 
@@ -224,7 +227,7 @@ export function activate(context: vscode.ExtensionContext) {
     // const lineText = getCodeOnLine()[1];
     // console.log(lineNum, lineText);
 
-    initCCSController('FreqCCS');
+    initCCSController();
     // console.log(CCS);
 
     //TODO: get the local vairaible name
@@ -295,7 +298,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         // if () {
-            const CCS_result = callCCSController('FreqCCS', filePath, lineNumber, line.replace(/"/g, '\\"'));
+            // const CCS_result = callCCSController('FreqCCS', filePath, lineNumber, line.replace(/"/g, '\\"'));
+            const CCS_result = callCCSController(MODE, filePath, lineNumber, line.replace(/"/g, '\\"'));
             dictionary = parseStringToList(CCS_result);
             console.log(dictionary);
             vscode.commands.executeCommand('editor.action.triggerSuggest');

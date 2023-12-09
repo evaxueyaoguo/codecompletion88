@@ -24,6 +24,7 @@ def context_list_to_method_frequency(context_list):
         else:
           type_method_frequency[method_call] = 1
       method_frequency[declared_type] = type_method_frequency
+  print(method_frequency)
   return method_frequency
 
 def save_method_frequency_to_file(method_frequency, file_path):

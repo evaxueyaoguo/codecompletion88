@@ -162,9 +162,9 @@ def main():
   FreqCCS_precision_values = []
   FreqCCS_recall_values = []
   FreqCCS_f1_values = []
-  for idx, test_context_vector in enumerate(test_context_vectors_degraded_processed[:100]):
+  for idx, test_context_vector in enumerate(test_context_vectors_degraded_processed):
 #   for idx, test_context_vector in enumerate(test_context_vectors_degraded_processed[:10]):
-    print("Predicting for test context vector " + str(idx) + "...")
+    print("Predicting for test context vector " + str(idx) + " in " + str(len(test_context_vectors_degraded_processed)) + " ...")
     #find best matching neighbors using Hamming distance
     best_matching_neighbors_BMNCCS = BMNCCS.find_best_matching_neighbors(test_context_vector, train_context_matrix_processed)
     recommendations_made_BMNCCS = BMNCCS.synthesize_recommendation(best_matching_neighbors_BMNCCS, combined_encoding_format)
