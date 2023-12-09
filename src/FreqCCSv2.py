@@ -108,9 +108,6 @@ def main():
     print(curr_code)
     curr_ast = BMNCCS.parse_to_ast(curr_code)[0] # context ast tree
     curr_variable = "y"
-    # print(curr_ast)
-    # context_vec = get_context(curr_ast, curr_variable)
-    # TODO: retvist how to get current context
     
     curr_context_dict = {}
     enclosing_methods_dict = BMNCCS.extract_classes_methods_variables(curr_ast)

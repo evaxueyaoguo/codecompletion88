@@ -235,34 +235,6 @@ def get_hamming_distance(vector1, vector2):
     # Calculate the Hamming distance between two binary vectors
     return sum(bit1 != bit2 for bit1, bit2 in zip(vector1, vector2))
 
-# def find_n_best_matching_neighbors(n, context_vec, context_matrix):
-#     #use Hamming distance to find the best matching neighbors
-#     # Calculate Hamming distances for all vectors in the matrix
-#     distances = [(i, get_hamming_distance(context_vec, row)) for i, row in enumerate(context_matrix)]
-
-#     # Sort the vectors based on Hamming distance and return the top n
-#     sorted_distances = sorted(distances, key=lambda x: x[1])
-#     best_n_neighbors = [index for index, _ in sorted_distances[:n]]
-#     best_n_neighbors = [context_matrix[index] for index in best_n_neighbors]
-#     return best_n_neighbors
-
-# def find_best_matching_neighbors(context_vec, context_matrix):
-#     # TODO: based on incomplete information
-#     # Use Hamming distance to find the best matching neighbors
-#     # Calculate Hamming distances for all vectors in the matrix
-#     distances = [(i, get_hamming_distance(context_vec, row)) for i, row in enumerate(context_matrix)]
-
-#     # Sort the vectors based on Hamming distance
-#     sorted_distances = sorted(distances, key=lambda x: x[1])
-
-#     # Find the minimum distance
-#     min_distance = sorted_distances[0][1]
-
-#     # Collect all vectors with equally the smallest distance
-#     best_matching_neighbors = [context_matrix[i] for i, dist in sorted_distances if dist == min_distance]\
-
-#     return best_matching_neighbors
-
 def find_best_matching_neighbors(context_vec, context_matrix):
     # Vector distance is calculated based in a partial feature space
     # The distance is calculated using incompVec
@@ -394,7 +366,7 @@ def remove_duplicate_rows(matrix):
     return unique_matrix
 
 def main():
-    # FIXME: is each column a local variable or a method context?
+    # TODO: is each column a local variable or a method context?
     # e.g. 'shell': [['HelloWorld.setText', 'HelloWorld.setLayout', 'HelloWorld.setDefaultButton', 'HelloWorld.setSize', 'HelloWorld.computeSize', 'HelloWorld.open', 'HelloWorld.isDisposed', 'HelloWorld.setText', 'anotherClass.setText'], 'Shell', ['in:HelloWorld.main', 'in:anotherClass.anotherMethodInAnotherClass', 'in:HelloWorld.anotherMethod']]
     # [1 1 1 0 0 0 0 0 1 0 0 1 0 1 1 1 0 1 1 1 0 0 0 1 0]
     # and {'shell': [['HelloWorld.setText'], 'Shell', ['in:HelloWorld.anotherMethod']]}

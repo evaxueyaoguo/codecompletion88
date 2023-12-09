@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
 import { execSync } from 'child_process';
 import * as path from 'path';
-import { get } from 'http';
-import { privateEncrypt } from 'crypto';
 
 /** Supported language type */
 const LANGUAGES = ['typescriptreact', 'typescript', 'javascript', 'javascriptreact', 'java'];
@@ -180,9 +178,6 @@ function parseStringToList(input: string): string[] {
 class MyCompletionItemProvider implements vscode.CompletionItemProvider {
     // Some method to get the updated completion items
     private getUpdatedCompletionItems(): vscode.CompletionItem[] {
-        // Your logic to get the updated completion items
-        // This could involve querying an API, updating a local cache, etc.
-        // ...
         let recommendations = [];
         for (let i = 0; i < dictionary.length; i++) {
             recommendations[i] = new vscode.CompletionItem(dictionary[i], vscode.CompletionItemKind.Method);
@@ -213,32 +208,12 @@ class MyCompletionItemProvider implements vscode.CompletionItemProvider {
     }
 }
 
-// Function to trigger code suggestion window
-function triggerCodeSuggestions() {
-    // Replace 'editor.action.triggerSuggest' with the actual command to trigger suggestions
-    vscode.commands.executeCommand(COMMAND_NAME);
-}
-
 export function activate(context: vscode.ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('🪩 Codecompletion88 is now active!');
-    // const codeOnScreen = getCodeOnScreen();
-    // console.log(codeOnScreen);
-    // const lineNum = getCodeOnLine()[0];
-    // const lineText = getCodeOnLine()[1];
-    // console.log(lineNum, lineText);
 
     initCCSController();
-    // console.log(CCS);
-
-    //TODO: get the local vairaible name
-    // const recommendationString = callPythonScript('hello');
-    // console.log(recommendationString);
-    // const recommendtaions = replaceVariableNameInArray("display", recommendationString);
-    // console.log(recommendtaions);
-    // dictionary = recommendtaions;
-
 
 	// The command has been defined in the package.json
 	// Now provide the implementation of the command with registerCommand
@@ -255,13 +230,10 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        // Get the selected line numbers
-        // const selectedLines = event.selections.map((selection) => selection.active.line);
         // Get the selected lines content
         const visibleRange = editor.visibleRanges[0];
 
         // Get the text within the visible range
-        // const codeOnScreen = editor.document.getText(visibleRange);
         const codeInEditor = editor.document.getText();
         let line = '';
         let lineNumber = -1;
@@ -270,20 +242,6 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Convert the URI to a file path
         const filePath = fileUri.fsPath;
-
-        // get selected line
-        // if (event.selections.length === 1 && event.selections[0].isEmpty) {
-        //     // Get the line number where the cursor is
-        //     lineNumber = event.selections[0].active.line;
-
-        //     // Get the text of the clicked line
-        //     line = editor.document.lineAt(lineNumber).text;
-
-        //     // Output the clicked line to the console (you can modify this part)
-        //     console.log('Clicked line:', line);
-
-        //     // return line.text;
-        // }
 
         // get typing line
         if (event.selections.length === 1) {
@@ -300,18 +258,11 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         if (line.trim().endsWith(".")) {
-            // const CCS_result = callCCSController('FreqCCS', filePath, lineNumber, line.replace(/"/g, '\\"'));
             const CCS_result = callCCSController(MODE, filePath, lineNumber, line.replace(/"/g, '\\"'));
             dictionary = parseStringToList(CCS_result);
             console.log("dictionary:");
             console.log(dictionary);    
-            // vscode.commands.executeCommand('editor.action.triggerSuggest');
-            // triggerCodeSuggestions();
         }
-        // dictionary= ['setText', 'setText']
-        // const recommendtaions = replaceVariableNameInArray("display", recommendationString);
-        // vscode.commands.executeCommand(COMMAND_NAME);
-        // triggerSuggest();
     });
 
     
@@ -327,5 +278,4 @@ export function activate(context: vscode.ExtensionContext) {
 
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}
