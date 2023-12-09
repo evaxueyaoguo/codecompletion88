@@ -4,6 +4,7 @@ import argparse
 import BMNCCS
 import random
 import csv
+import FreqCCSv2 as FreqCCS
 
 def split_list(input_list, percentage=90):
     # Calculate the number of elements to select based on the percentage
@@ -88,7 +89,7 @@ def main():
         
         # for variable, data in context_dict.items():
         #     print(variable, data)
-        
+    
     # context_matrix, encoding_format = context_dict_to_matrix(context_dict_processed)
     train_context_matrix, train_encoding_format = BMNCCS.context_set_to_matrix(train_context_list)
     train_unique_context_matrix = BMNCCS.remove_duplicate_rows(train_context_matrix)
@@ -149,6 +150,11 @@ def main():
     print(len(test_context_matrix))
     print(len(test_unique_context_matrix))
     print(test_encoding_format)
+    
+    train_method_frequency = FreqCCS.context_list_to_method_frequency(train_context_list)
+    test_method_frequency = FreqCCS.context_list_to_method_frequency(test_context_list)
+    FreqCCS.save_method_frequency_to_file(train_method_frequency, "train_method_frequency.txt")
+    FreqCCS.save_method_frequency_to_file(test_method_frequency, "test_method_frequency.txt")
     
     
 if __name__ == '__main__':

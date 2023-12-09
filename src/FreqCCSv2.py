@@ -2,6 +2,7 @@ import javalang
 import os
 import numpy as np
 import BMNCCS
+import json
   
 def context_list_to_method_frequency(context_list):
   method_frequency = {}
@@ -25,6 +26,14 @@ def context_list_to_method_frequency(context_list):
       method_frequency[declared_type] = type_method_frequency
   return method_frequency
 
+def save_method_frequency_to_file(method_frequency, file_path):
+  with open(file_path, 'w') as file:
+    json.dump(method_frequency, file)
+        
+def get_method_frequency_from_file(file_path):
+  with open(file_path, 'r') as file:
+    data = json.load(file)
+  return data
 
 def get_recommendations_from_method_frequency(curr_context_dict_processed, method_frequency, n):
   var_type = curr_context_dict_processed[1]
@@ -44,8 +53,6 @@ def main():
     data_code = BMNCCS.collect_code_examples(data_path) # list of file strings
     ast_trees = BMNCCS.parse_to_ast(data_code) # list of ast trees
     context_list = list()
-    encoding_format = []
-    context_matrix = []
     # print(len(ast_trees))
 
     for ast in ast_trees: 
@@ -79,6 +86,7 @@ def main():
  
     curr_directory_path = os.path.join(current_directory, "curr_file")
     curr_code = BMNCCS.collect_code_examples(curr_directory_path) # list of file strings
+    print(curr_code)
     curr_ast = BMNCCS.parse_to_ast(curr_code)[0] # context ast tree
     curr_variable = "y"
     # print(curr_ast)
