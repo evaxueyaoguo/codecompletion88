@@ -1,6 +1,7 @@
 import os
 import javalang
 import openai
+import re
 
 def remove_line_from_file(code, lineNum):
     # Split the code into lines
@@ -32,6 +33,14 @@ def parse_to_ast(code):
         # print(f"Error parsing Java code: {e}")
         pass
       
+def get_var_name_from_line(line):
+    return remove_whitespace(line.split(" ").pop())
+
+def remove_whitespace(input_string):
+    # Use regular expression to replace tabs, newlines, and spaces with an empty string
+    cleaned_string = re.sub(r'[\t\n\s]', '', input_string)
+    return cleaned_string
+
 def get_var_name_from_openai(line):
     # TODO: implement
     # if there is one: return var name
@@ -42,9 +51,9 @@ def get_var_name_from_openai(line):
     # TODO: imporve the prompt so that correct variable names are returned more often
     # prompt = line +  "\nget the name of the variable from the line of java code above. The line of java code may be complete or incomplete. If there is one: return var name. If there is none: return \"\" The line may be variable declaration, method call, method definition, or class definition."
 
-    prompt = line +  "\nget the name of the variable from the line of java code above. The line of java code may be complete or incomplete."
+    prompt = line +  "\nget a name of a variable from the line of java code above. The line of java code may be complete or incomplete. If no variable name can be found, return a space"
 
-    variable_name = ""
+    variable_name = " "
     try: 
     # Call the OpenAI API
       response = openai.Completion.create(
@@ -57,5 +66,6 @@ def get_var_name_from_openai(line):
       # Extract and return the generated variable name
       variable_name = response.choices[0].text.strip()
     except Exception as e:
+      print(e)
       pass
     return variable_name

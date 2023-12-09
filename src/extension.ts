@@ -4,8 +4,8 @@ import * as path from 'path';
 import { get } from 'http';
 
 /** Supported language type */
-// const LANGUAGES = ['typescriptreact', 'typescript', 'javascript', 'javascriptreact'];
-const LANGUAGES = ['java'];
+const LANGUAGES = ['typescriptreact', 'typescript', 'javascript', 'javascriptreact', 'java'];
+// const LANGUAGES = ['java'];
 
 let dictionary = ['hello', 'nihao', 'dajiahao', 'leihaoa'];
 
@@ -172,9 +172,46 @@ function parseStringToList(input: string): string[] {
 
     return stringArray;
 }
+// Custom completion item provider class
+class MyCompletionItemProvider implements vscode.CompletionItemProvider {
+    // Some method to get the updated completion items
+    private getUpdatedCompletionItems(): vscode.CompletionItem[] {
+        // Your logic to get the updated completion items
+        // This could involve querying an API, updating a local cache, etc.
+        // ...
+        let recommendations = [];
+        for (let i = 0; i < dictionary.length; i++) {
+            recommendations[i] = new vscode.CompletionItem(dictionary[i], vscode.CompletionItemKind.Method);
+            recommendations[i].documentation = 'Method recommended by CC88🪩';
+            recommendations[i].label = dictionary[i]+ "🪩";
+            recommendations[i].insertText = dictionary[i].split('.').pop();
+            recommendations[i].detail = 'from CC88🪩';
+            recommendations[i].kind = vscode.CompletionItemKind.Method;
+        }
 
-function triggerSuggest() {
-    vscode.commands.executeCommand('editor.action.triggerSuggest');
+        // Return the updated completion items
+        // recommendations[0].preselect = true;
+        return recommendations;
+    }
+
+    // Implementation of provideCompletionItems method
+    provideCompletionItems(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+        token: vscode.CancellationToken
+    ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
+        // Call the method to get the updated completion items
+        const updatedItems = this.getUpdatedCompletionItems();
+
+        // Return the updated items
+        return updatedItems;
+    }
+}
+
+// Function to trigger code suggestion window
+function triggerCodeSuggestions() {
+    // Replace 'editor.action.triggerSuggest' with the actual command to trigger suggestions
+    vscode.commands.executeCommand(COMMAND_NAME);
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -204,6 +241,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let activator = vscode.commands.registerCommand('codecompletion88.activate', () => {
 		vscode.window.showInformationMessage('Codecompletion88 is now active! 🪩');
 	});
+    context.subscriptions.push(activator);
 
     let lineSelectionListener = vscode.window.onDidChangeTextEditorSelection((event) => {
         // Check if there is an active text editor
@@ -256,38 +294,30 @@ export function activate(context: vscode.ExtensionContext) {
             console.log('Typed line:', line);
         }
 
-
-        const CCS_result = callCCSController('FreqCCS', filePath, lineNumber, line.replace(/"/g, '\\"'));
-        dictionary = parseStringToList(CCS_result);
+        // if () {
+            const CCS_result = callCCSController('FreqCCS', filePath, lineNumber, line.replace(/"/g, '\\"'));
+            dictionary = parseStringToList(CCS_result);
+            console.log(dictionary);
+            vscode.commands.executeCommand('editor.action.triggerSuggest');
+            // triggerCodeSuggestions();
+        // }
+        // dictionary= ['setText', 'setText']
+        // const recommendtaions = replaceVariableNameInArray("display", recommendationString);
+        // vscode.commands.executeCommand(COMMAND_NAME);
         // triggerSuggest();
     });
 
-    /** Trigger a list of recommended characters */
-    const triggers = [' '];
-    registerCommand(COMMAND_NAME);
-    const completionProvider = vscode.languages.registerCompletionItemProvider(LANGUAGES, {
-        async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
-            const range = new vscode.Range(new vscode.Position(position.line, 0), position);
-            const text = document.getText(range);
-            const completionItemList: vscode.CompletionItem[] = dictionary.filter(item => item.startsWith(text)).map((item, idx) => ({
-                label: item,
-                preselect: idx === 0,
-                documentation: 'My dedicated VsCode plug-ins provider',
-                sortText: `my_completion_${idx}`,
-                command: {
-                    arguments: [text],
-                    command: COMMAND_NAME,
-                    title: 'choose item'
-                },
-            }));
-            return completionItemList;
-        }
-    }, ...triggers);
-
-    context.subscriptions.push(completionProvider);
-
-    context.subscriptions.push(activator);
+    
     context.subscriptions.push(lineSelectionListener);
+
+        /** Trigger a list of recommended characters */
+        const triggers = [' ', '.'];
+        registerCommand(COMMAND_NAME);
+        const completionProvider = new MyCompletionItemProvider();
+        const disposable = vscode.languages.registerCompletionItemProvider(LANGUAGES, completionProvider, ...triggers);
+    
+        context.subscriptions.push(disposable);
+
 }
 
 // This method is called when your extension is deactivated

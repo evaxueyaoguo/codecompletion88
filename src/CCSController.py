@@ -10,10 +10,14 @@ def get_recommendaions_FreqCCS(context_path, lineNum, line):
     
     # curr_ast = BMNCCS.parse_to_ast(curr_code)[0]
     code = util.get_code_from_file(context_path)
-    code_with_line_removed = util.remove_line_from_file(code, lineNum)
-    ast = util.parse_to_ast(code_with_line_removed)
+    code = util.remove_line_from_file(code, lineNum)
+    # print(lineNum)
+    ast = util.parse_to_ast(code)
     
-    curr_variable = util.get_var_name_from_openai(line)
+    # curr_variable = util.get_var_name_from_openai(line)
+    curr_variable = util.get_var_name_from_line(line)
+    curr_variable = curr_variable.split(".")[0]
+    # print(curr_variable)
     # print(curr_variable)
     # print(curr_ast)
     # context_vec = get_context(curr_ast, curr_variable)
@@ -31,7 +35,13 @@ def get_recommendaions_FreqCCS(context_path, lineNum, line):
     
     # recommendations
     recommendations = FreqCCS.get_recommendations_from_method_frequency(curr_context_dict_processed[curr_variable], method_frequency, 5)
-    return recommendations
+    recommendations_processed = []
+    for item in recommendations:
+      recommendations_processed.append(f"{curr_variable}{item}")
+    # for item in recommendations_processed:
+    #   print(item)
+    return recommendations_processed
+    # return recommendations
   
 def get_recommendaions_BMNCCS(context_path, lineNum, line):
   pass
