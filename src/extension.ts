@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { execSync } from 'child_process';
 import * as path from 'path';
 import { get } from 'http';
+import { privateEncrypt } from 'crypto';
 
 /** Supported language type */
 const LANGUAGES = ['typescriptreact', 'typescript', 'javascript', 'javascriptreact', 'java'];
@@ -12,8 +13,8 @@ let dictionary = ['hello', 'nihao', 'dajiahao', 'leihaoa'];
 /** Commands that are triggered after the user chooses items */
 const COMMAND_NAME = 'my_code_completion_choose_item';
 
-// const MODE= 'BMNCCS';
-const MODE= 'FreqCCS';
+const MODE= 'BMNCCS';
+// const MODE= 'FreqCCS';
 
 /** The command triggered when the recommended item is registered */
 function registerCommand(command: string) {
@@ -190,6 +191,7 @@ class MyCompletionItemProvider implements vscode.CompletionItemProvider {
             recommendations[i].insertText = dictionary[i].split('.').pop();
             recommendations[i].detail = 'from CC88 ' + MODE + "🪩";
             recommendations[i].kind = vscode.CompletionItemKind.Method;
+            recommendations[i].preselect = true;
         }
 
         // Return the updated completion items
@@ -297,14 +299,15 @@ export function activate(context: vscode.ExtensionContext) {
             console.log('Typed line:', line);
         }
 
-        // if () {
+        if (line.trim().endsWith(".")) {
             // const CCS_result = callCCSController('FreqCCS', filePath, lineNumber, line.replace(/"/g, '\\"'));
             const CCS_result = callCCSController(MODE, filePath, lineNumber, line.replace(/"/g, '\\"'));
             dictionary = parseStringToList(CCS_result);
-            console.log(dictionary);
-            vscode.commands.executeCommand('editor.action.triggerSuggest');
+            console.log("dictionary:");
+            console.log(dictionary);    
+            // vscode.commands.executeCommand('editor.action.triggerSuggest');
             // triggerCodeSuggestions();
-        // }
+        }
         // dictionary= ['setText', 'setText']
         // const recommendtaions = replaceVariableNameInArray("display", recommendationString);
         // vscode.commands.executeCommand(COMMAND_NAME);
@@ -319,7 +322,7 @@ export function activate(context: vscode.ExtensionContext) {
         registerCommand(COMMAND_NAME);
         const completionProvider = new MyCompletionItemProvider();
         const disposable = vscode.languages.registerCompletionItemProvider(LANGUAGES, completionProvider, ...triggers);
-    
+
         context.subscriptions.push(disposable);
 
 }

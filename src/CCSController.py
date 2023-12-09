@@ -53,13 +53,13 @@ def get_recommendaions_BMNCCS(context_path, lineNum, line):
     method_calls, declared_type = BMNCCS.get_method_calls_and_type_on_local_variable(ast, curr_variable)
     enclosing_methods = BMNCCS.get_enclosing_methods_from_dict(curr_variable, enclosing_methods_dict)
     curr_context_dict[curr_variable] = [method_calls, declared_type, enclosing_methods]
-    print("curr_context_dict")
-    for variable, data in curr_context_dict.items():
-        print(variable, data)
+    # print("curr_context_dict")
+    # for variable, data in curr_context_dict.items():
+    #     print(variable, data)
     
     curr_context_dict_processed = BMNCCS.process_context_dict(curr_context_dict)
-    print("curr_context_dict_processed")
-    print(curr_context_dict_processed)
+    # print("curr_context_dict_processed")
+    # print(curr_context_dict_processed)
     
     training_context_matrix = predict.read_binary_matrix_from_csv("/Users/xueyaoguo/Desktop/DS_project/codecompletion88/training_context_matrix.csv")
     training_encoding_format = predict.read_text_file("/Users/xueyaoguo/Desktop/DS_project/codecompletion88/training_encoding_format.txt")
@@ -76,11 +76,11 @@ def get_recommendaions_BMNCCS(context_path, lineNum, line):
     # get training context matrix
     
     best_matching_neighbors = BMNCCS.find_best_matching_neighbors(curr_context_vector, training_context_matrix)
-    print(len(best_matching_neighbors))
+    # print(len(best_matching_neighbors))
     
     # TODO: synthesize a recommendation based on the best matching neighbors
     recommendations = BMNCCS.synthesize_recommendation(best_matching_neighbors, training_encoding_format)
-    print(recommendations)
+    # print(recommendations)
     recommendations_processed = []
     for item in recommendations:
       recommendations_processed.append(f"{curr_variable}{item}")
