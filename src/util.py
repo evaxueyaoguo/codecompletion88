@@ -45,7 +45,7 @@ def get_var_name_from_openai(line):
     # TODO: implement
     # if there is one: return var name
     # if there is none: return ""
-    openai.api_key = "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"
+    openai.api_key = "insert api key"
 
     # Customize the prompt to instruct the model
     # TODO: imporve the prompt so that correct variable names are returned more often
